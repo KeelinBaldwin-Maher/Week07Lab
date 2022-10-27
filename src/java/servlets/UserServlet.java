@@ -24,8 +24,10 @@ public class UserServlet extends HttpServlet {
         int size = users.size();
        
         // set the attributes
+        boolean editUser = false;
         request.setAttribute("users", users);
         request.setAttribute("size", size);
+        request.setAttribute("editUser", editUser);
         
         // Send to users.jsp
         getServletContext().getRequestDispatcher("/WEB-INF/users.jsp").forward(request, response);
