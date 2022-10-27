@@ -15,11 +15,17 @@ public class UserServlet extends HttpServlet {
             throws ServletException, IOException {
         
         // test populate table
-        int[] users = {1, 2, 3, 4};
+        ArrayList<Integer> users = new ArrayList<>();
+        users.add(1);
+        users.add(2);
+        users.add(3);
+        users.add(4);
+        // test error message   
+        int size = users.size();
        
-        
-        // set the attribute
+        // set the attributes
         request.setAttribute("users", users);
+        request.setAttribute("size", size);
         
         // Send to users.jsp
         getServletContext().getRequestDispatcher("/WEB-INF/users.jsp").forward(request, response);
