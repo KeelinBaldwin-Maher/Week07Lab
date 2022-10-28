@@ -24,15 +24,15 @@
                 padding: 0.25rem 1rem;
                 border: 1px solid black;
             }
-            
+
             form {
-                 line-height: 1.75rem;
+                line-height: 1.75rem;
             }
-            
+
             input {
                 font-size: 1rem;
             }
-            
+
             select {
                 font-size: 1rem;
                 padding: 0.05rem;
@@ -50,7 +50,7 @@
             <c:when test="${size == 0}">
                 <h3>No users found. Please add a user</h3>
             </c:when>
- 
+
             <%-- Display all users in a table if the database has users --%>
             <c:when test="${size >= 1}">    
                 <table>
@@ -72,8 +72,24 @@
                             <td>${user.role.roleName}</td>
 
                             <%-- Edit and delete links --%>
-                            <td><a href="users?edit">Edit</a></td>
-                            <td><a href="users?delete">Delete</a></td> 
+                            <td><a href="
+                                   <c:url value='users'>
+                                       <c:param name='edit' value='${user.email}' />
+                                   </c:url>
+                                   ">
+                                    Edit
+                                </a>
+                            </td>
+                            <td>
+                                <a href="
+                                   <c:url value='users'>
+                                       <c:param name='delete' value='${user.email}' />
+                                   </c:url>
+                                   ">
+                                    Delete
+                                </a>
+                            </td>
+
                         </tr>
                     </c:forEach>
                 </table>
@@ -88,12 +104,22 @@
         <form action="users" method="post">
 
             <%-- E-mail input, readonly if edit is true --%>
-            Email: <input type="text" ${editUser ? "readonly" : "" } name="email" 
-                          value="${editUser ? user.email : ""}"><br>
+            <c:choose>
+                <c:when test="${editUser}">
+                    Email: ${userToEdit.email}
+                </c:when>
+
+                <c:otherwise>
+                    Email: <input type="text" name="email" value="${inputEmail}">
+                </c:otherwise>
+            </c:choose>
+            <br>
 
             <%-- If in edit mode name inputs are filled in with the selected user--%>
-            First name: <input type="text" name="firstName" value="${editUser ? user.firstName : ""}"><br>
-            Last name: <input type="text" name="lastName" value="${editUser ? user.lastName : ""}"><br>
+            First name: <input type="text" name="firstName" 
+                               value="${editUser ? userToEdit.firstName : inputFirstName}"><br>
+            Last name: <input type="text" name="lastName" 
+                              value="${editUser ? userToEdit.lastName : inputLastName}"><br>
 
             Password: <input type="password" name="password"><br>
 
@@ -102,9 +128,10 @@
             <select name="role">
                 <%-- Populate the selections based on the data from the role table --%>
                 <c:forEach var="role" items="${roles}">
-                    <option value="${role.roleID}" ${user.role.isSelected ? "selected" : ""}>
-                        ${role.roleName}</option>
-                </c:forEach>
+                    <option value="${role.roleID}" ${(userToEdit.role.roleID == role.roleID)  ? "selected" : ""}>
+                        ${role.roleName}
+                    </option>
+                    </c:forEach>
             </select><br>
 
             <%-- If in edit mode show the buttons for update and cancel 
@@ -113,19 +140,20 @@
                 <c:when test="${editUser}">
                     <input type="submit" value="Update" name="action">
                     <input type="submit" value="Cancel" name="action">
+                    <input type="hidden" value="${userToEdit.email}" name="email">
                 </c:when>
 
                 <c:otherwise>
                     <input type="submit" value="Add user">
                     <input type="hidden" value="Add" name="action">
+                    </c:otherwise>
+            </c:choose>
+                    
                     <br>
                     <%-- Display message if inputed data is invalid or if the email 
                             already exists in the database --%>
                     ${dataInvalid ? "All fields are required" : ""}
                     ${emailAlreadyExists ? "E-mail already exists" : ""}
-                    
-                </c:otherwise>
-            </c:choose>
 
         </form>
 

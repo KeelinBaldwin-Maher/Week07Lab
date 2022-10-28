@@ -78,9 +78,9 @@ public class UserDB {
         return matchingEmail;
     }
 
-    public void insertNewUser(String email, String firstName, String lastName, String password, int roleID)  
-            throws Exception{
-       // SQL statement for insertNewUser into user table
+    public void insertNewUser(String email, String firstName, String lastName, String password, int roleID)
+            throws Exception {
+        // SQL statement for insertNewUser into user table
         String insert
                 = "INSERT INTO user "
                 + "VALUES (?, ?, ?, ?, ?)  ;";
@@ -92,19 +92,99 @@ public class UserDB {
             ps.setString(3, lastName);
             ps.setString(4, password);
             ps.setInt(5, roleID);
+            // Execute INSERT
             ps.executeUpdate();
 
         } finally {
             close();
         }
     }
+
+    public User findUser(String email) throws Exception {
+        // SQL statement to find user based on email
+        String findUser
+                = "SELECT * "
+                + "FROM user "
+                + "WHERE email = ? ;";
+
+        User user = null;
+
+        try {
+            ps = connection.prepareStatement(findUser);
+            ps.setString(1, email);
+            // Execute SELECT;
+            rs = ps.executeQuery();
+
+            // Iterate through the retrieved row
+            while (rs.next()) {
+                String firstName = rs.getString(2);
+                String lastName = rs.getString(3);
+                String password = rs.getString(4);
+                Role role = new Role(rs.getInt(5));
+                // Create user
+                user = new User(email, firstName, lastName, password, role);
+            }
+
+        } finally {
+            close();
+        }
+
+        return user;
+    }
+
+    public void updateUser(String email, String firstName, String lastName, String password, int roleID)
+            throws Exception {
+        // SQL statement to update user based on email
+        String updateUser
+                = "UPDATE user "
+                + "SET "
+                + "first_name = ?, "
+                + "last_name = ?, "
+                + "password = ?, "
+                + "role = ? "
+                + "WHERE email = ? ;";
+
+        try {
+            ps = connection.prepareStatement(updateUser);
+            ps.setString(1, firstName);
+            ps.setString(2, lastName);
+            ps.setString(3, password);
+            ps.setInt(4, roleID);
+            ps.setString(5, email);
+            // Execute UPDATE;
+            ps.executeUpdate();
+
+        } finally {
+            close();
+        }
+    }
+
+    public void deleteUser(String email) throws Exception{
+        // SQL statement to delete user based on email
+        String deletUser = 
+                "DELETE FROM user "
+                + "WHERE email = ?;";
+
+        try {
+            ps = connection.prepareStatement(deletUser);
+            ps.setString(1, email);
+            // Execute DELETE;
+            ps.executeUpdate();
+
+        } finally {
+            close();
+        }
+        
+    }
     
     private void close() {
         // ensure that the connection, prepared statement and
         // the result set are closed
         DBUtil.closePreparedStatement(ps);
-        DBUtil.closeResultSet(rs);
         connectionPool.freeConnection(connection);
+        if (rs != null) {
+            DBUtil.closeResultSet(rs);
+        }
     }
-
+    
 }

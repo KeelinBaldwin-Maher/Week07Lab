@@ -12,8 +12,16 @@ public class UserService {
     }
 
     // Retrieve a specific user
-    public static User getUser() {
-        return null;
+    public static User getUser(String email) {
+        User user;
+        try {
+            user = new UserDB().findUser(email);
+        } catch (Exception ex) {
+            // Return null if the database could not be reached
+            System.out.println(ex);
+            user = null;
+        }
+        return user;
     }
 
     // Returns an ArrayList of all the users from the database and their roles
@@ -63,9 +71,30 @@ public class UserService {
     public static void addUser(String email, String firstName, String lastName, String password, int roleID) {
         try {
             new UserDB().insertNewUser(email, firstName, lastName, password, roleID);
+            
         } catch (Exception ex) {
             System.out.println(ex);
         }
+    }
+    
+    // Delete a user from the database
+     public static void deleteUser(String email) {
+       try {
+           new UserDB().deleteUser(email);
+           
+       } catch (Exception ex) {
+           System.out.println(ex);
+       }
+    }
+    
+    // Update a current user in the database
+    public static void updateUser(String email, String firstName, String lastName, String password, int roleID) {
+       try {
+           new UserDB().updateUser(email, firstName, lastName, password, roleID);
+       } catch (Exception ex) {
+           System.out.println(ex);
+       }
+        
     }
 
 }
