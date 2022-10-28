@@ -1,9 +1,3 @@
-<%-- 
-    Document   : users
-    Created on : Oct 26, 2022, 11:01:05 AM
-    Author     : ety
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
@@ -30,6 +24,19 @@
                 padding: 0.25rem 1rem;
                 border: 1px solid black;
             }
+            
+            form {
+                 line-height: 1.75rem;
+            }
+            
+            input {
+                font-size: 1rem;
+            }
+            
+            select {
+                font-size: 1rem;
+                padding: 0.05rem;
+            }
 
         </style>
 
@@ -38,19 +45,13 @@
 
         <h1>Manage Users</h1>
 
-        <%-- Determine if the database is empty --%>
         <c:choose>
-            <%-- Inform the user if the database is empty--%>
+            <%-- Inform the user if the database is empty --%>
             <c:when test="${size == 0}">
                 <h3>No users found. Please add a user</h3>
             </c:when>
-
-            <%-- Show message if there was an error connecting to the database --%>
-            <c:when test="${users == null}">
-                <h3>There was a problem in the dataaccess layer</h3>
-            </c:when>
-
-            <%-- Display all users in a table if the database has users--%>
+ 
+            <%-- Display all users in a table if the database has users --%>
             <c:when test="${size >= 1}">    
                 <table>
                     <tr>
@@ -61,9 +62,7 @@
                         <th colspan="2"></th>
                     </tr>
 
-                    <%-- Display a row for each user in the database 
-                    TODO properly add users
-                    REMEBER users.user.name <-- gets name --%>
+                    <%-- Display a row for each user in the database  --%>
                     <c:forEach var="user" items="${users}">
                         <tr>
                             <%-- User data --%>
@@ -102,26 +101,29 @@
             Role: 
             <select name="role">
                 <%-- Populate the selections based on the data from the role table --%>
-                <%--
-                <c:forEach var="role" items="roles">
-                    <option value="${role.roleName}" ${user.role.isSelected ? "selected" : ""}>
+                <c:forEach var="role" items="${roles}">
+                    <option value="${role.roleID}" ${user.role.isSelected ? "selected" : ""}>
                         ${role.roleName}</option>
-                    </c:forEach>
-                     --%>
-                     <option value="systemAdmin" ${roleAdmin ? "selected" : ""}>system admin</option>
-                     <option value="regularUser" ${roleRegular ? "selected" : ""}>system admin</option>
-                   
+                </c:forEach>
             </select><br>
 
-            <%-- If in edit mode show the buttons for update and cancel --%>
+            <%-- If in edit mode show the buttons for update and cancel 
+                    otherwise, show add --%>
             <c:choose>
                 <c:when test="${editUser}">
                     <input type="submit" value="Update" name="action">
                     <input type="submit" value="Cancel" name="action">
                 </c:when>
-                    
+
                 <c:otherwise>
-                    <input type="submit" value="Add user" name="action">
+                    <input type="submit" value="Add user">
+                    <input type="hidden" value="Add" name="action">
+                    <br>
+                    <%-- Display message if inputed data is invalid or if the email 
+                            already exists in the database --%>
+                    ${dataInvalid ? "All fields are required" : ""}
+                    ${emailAlreadyExists ? "E-mail already exists" : ""}
+                    
                 </c:otherwise>
             </c:choose>
 

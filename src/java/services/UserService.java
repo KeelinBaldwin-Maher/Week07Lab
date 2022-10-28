@@ -30,7 +30,7 @@ public class UserService {
                 // Determine the users role name using their role number 
                 int userRoleNumber = user.getRole().getRoleID();
                 String roleName = RoleService.findRoleName(userRoleNumber);
-                
+
                 // Set the users role name 
                 user.getRole().setRoleName(roleName);
             }
@@ -42,6 +42,30 @@ public class UserService {
         }
 
         return users;
+    }
+
+    // Determine if the email already exists in the database
+    public static boolean inValidEmail(String email) {
+        String matchingEmail = null;
+
+        try {
+            // find the matching email
+            matchingEmail = new UserDB().findEmail(email);
+
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+
+        return email.equals(matchingEmail);
+    }
+
+    // Add a new user to the database
+    public static void addUser(String email, String firstName, String lastName, String password, int roleID) {
+        try {
+            new UserDB().insertNewUser(email, firstName, lastName, password, roleID);
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
     }
 
 }

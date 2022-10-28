@@ -8,7 +8,6 @@ import models.Role;
 
 public class RoleDB {
     // Connect to the database
-
     ConnectionPool connectionPool = ConnectionPool.getInstance();
     Connection connection = connectionPool.getConnection();
     // Used to send queries and updates to database
@@ -17,7 +16,7 @@ public class RoleDB {
     ResultSet rs = null;
 
     // Retrieve all rows from userdb role table
-    public ArrayList<Role> getAllRoleData() throws Exception {
+    public ArrayList<Role> getAllRoles() throws Exception {
         // SQL statement to retrieve all roles
         String selectAllRoleData
                 = "SELECT * "
@@ -43,49 +42,13 @@ public class RoleDB {
             }
 
         } finally {
-            // ensure that the connection, prepared statement and
-            // the result set are closed
-            DBUtil.closePreparedStatement(ps);
-            DBUtil.closeResultSet(rs);
-            connectionPool.freeConnection(connection);
+            close();
         }
 
         return roles;
     }
 
-    // Retrieve all role names from userdb role table
-    public ArrayList<String> getAllRoleNames() throws Exception {
-        // SQL statement to retrieve all role names
-        String selectAllRoleNames
-                = "SELECT role_name "
-                + "FROM role;";
-
-        // ArrayList to hold retrieved role names
-        ArrayList<String> roleNames = new ArrayList<>();
-
-        try {
-            ps = connection.prepareStatement(selectAllRoleNames);
-            // Execute SELECT statement
-            rs = ps.executeQuery();
-
-            // Iterate through the retrieved rows
-            while (rs.next()) {
-                // Place role names in ArrayList
-                roleNames.add(rs.getString(1));
-            }
-
-        } finally {
-            // ensure that the connection, prepared statement and
-            // the result set are closed
-            DBUtil.closePreparedStatement(ps);
-            DBUtil.closeResultSet(rs);
-            connectionPool.freeConnection(connection);
-        }
-        return roleNames;
-    }
-
-    
-    
+      
     public String getRoleName(int roleID) throws Exception{
         // SQL statement to retrieve role name
         String selectRoleName
@@ -108,14 +71,18 @@ public class RoleDB {
             roleName = rs.getString(1);
                        
         } finally {
-            // ensure that the connection, prepared statement and
-            // the result set are closed
-            DBUtil.closePreparedStatement(ps);
-            DBUtil.closeResultSet(rs);
-            connectionPool.freeConnection(connection);
+            close();
         }
 
         return roleName;
+    }
+    
+    private void close() {
+        // ensure that the connection, prepared statement and
+        // the result set are closed
+        DBUtil.closePreparedStatement(ps);
+        DBUtil.closeResultSet(rs);
+        connectionPool.freeConnection(connection);
     }
 
 }

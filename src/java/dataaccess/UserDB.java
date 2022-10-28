@@ -7,6 +7,7 @@ import java.util.*;
 import models.*;
 
 public class UserDB {
+
     // Connect to the database
     ConnectionPool connectionPool = ConnectionPool.getInstance();
     Connection connection = connectionPool.getConnection();
@@ -17,10 +18,10 @@ public class UserDB {
 
     public ArrayList<User> getAllUsers() throws Exception {
         // SQL statement to retrieve all users
-        String selectAllFromUser = 
-                "SELECT * " + 
-                "FROM user";
-    
+        String selectAllFromUser
+                = "SELECT * "
+                + "FROM user";
+
         // ArrayList to hold retrieved users
         ArrayList<User> users = new ArrayList<>();
 
@@ -44,14 +45,66 @@ public class UserDB {
             }
 
         } finally {
-            // ensure that the connection, prepared statement and
-            // the result set are closed
-            DBUtil.closePreparedStatement(ps);
-            DBUtil.closeResultSet(rs);
-            connectionPool.freeConnection(connection);
+            close();
         }
 
         return users;
+    }
+
+    public String findEmail(String email) throws Exception {
+        // SQL statement to see if there is a matching email
+        String findEmail
+                = "SELECT email "
+                + "FROM user "
+                + "WHERE email = ? ;";
+
+        String matchingEmail = null;
+
+        try {
+            ps = connection.prepareStatement(findEmail);
+            ps.setString(1, email);
+            // Execute SELECT;
+            rs = ps.executeQuery();
+
+            // Iterate through the retrieved row
+            while (rs.next()) {
+                matchingEmail = rs.getString(1);
+            }
+
+        } finally {
+            close();
+        }
+
+        return matchingEmail;
+    }
+
+    public void insertNewUser(String email, String firstName, String lastName, String password, int roleID)  
+            throws Exception{
+       // SQL statement for insertNewUser into user table
+        String insert
+                = "INSERT INTO user "
+                + "VALUES (?, ?, ?, ?, ?)  ;";
+
+        try {
+            ps = connection.prepareStatement(insert);
+            ps.setString(1, email);
+            ps.setString(2, firstName);
+            ps.setString(3, lastName);
+            ps.setString(4, password);
+            ps.setInt(5, roleID);
+            ps.executeUpdate();
+
+        } finally {
+            close();
+        }
+    }
+    
+    private void close() {
+        // ensure that the connection, prepared statement and
+        // the result set are closed
+        DBUtil.closePreparedStatement(ps);
+        DBUtil.closeResultSet(rs);
+        connectionPool.freeConnection(connection);
     }
 
 }

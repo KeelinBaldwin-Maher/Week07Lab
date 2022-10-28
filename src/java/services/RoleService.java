@@ -7,25 +7,20 @@ import models.Role;
 public class RoleService {
     // Retrieve all data from about roles from the database
     public static ArrayList<Role> getAllRoles() {
-        return null;
-    }
-    
-    // Retrieve all role names from the database
-    public static ArrayList<String> getAllRoleNames() {
-        ArrayList<String> roleNames;
+        ArrayList<Role> roles;
         
         try{
-            roleNames = new RoleDB().getAllRoleNames();
+            roles = new RoleDB().getAllRoles();
             
         } catch (Exception ex) {
              // Return null if the database could not be reached
             System.out.println(ex);
-            roleNames = null;
+            roles = null;
         }
         
-      return roleNames;        
+      return roles;   
     }
-
+    
     // Find the a role name based on its ID
     public static String findRoleName(int roleID) {
        String roleName;
