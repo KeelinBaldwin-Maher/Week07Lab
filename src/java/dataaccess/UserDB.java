@@ -20,7 +20,7 @@ public class UserDB {
         // SQL statement to retrieve all users
         String selectAllFromUser
                 = "SELECT * "
-                + "FROM user";
+                + "FROM user ;";
 
         // ArrayList to hold retrieved users
         ArrayList<User> users = new ArrayList<>();

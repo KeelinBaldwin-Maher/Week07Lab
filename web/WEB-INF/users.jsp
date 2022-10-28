@@ -24,9 +24,14 @@
                 padding: 0.25rem 1rem;
                 border: 1px solid black;
             }
+            
+            #formHeader {
+                padding: 2rem 0 0.5rem 0;
+                margin: 0;
+            }
 
             form {
-                line-height: 1.75rem;
+                line-height: 1.85rem;
             }
 
             input {
@@ -98,7 +103,7 @@
         </c:choose>
 
         <%-- Display header depending on selected functionality --%>
-        <h2> ${editUser ? "Edit User" : "Add User"} </h2>
+        <h2 id="formHeader"> ${editUser ? "Edit User" : "Add User"} </h2>
 
         <%-- Add or edit user form --%>
         <form action="users" method="post">
