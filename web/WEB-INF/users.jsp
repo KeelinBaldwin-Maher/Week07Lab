@@ -17,7 +17,7 @@
             body {
                 font-family: Gill, Helvetica, sans-serif;
             }
-            
+
             table {
                 border-collapse: collapse;
             }
@@ -44,8 +44,13 @@
             <c:when test="${size == 0}">
                 <h3>No users found. Please add a user</h3>
             </c:when>
-                
-           <%-- Display all users in a table if the database has users--%>
+
+            <%-- Show message if there was an error connecting to the database --%>
+            <c:when test="${users == null}">
+                <h3>There was a problem in the dataaccess layer</h3>
+            </c:when>
+
+            <%-- Display all users in a table if the database has users--%>
             <c:when test="${size >= 1}">    
                 <table>
                     <tr>
@@ -59,13 +64,13 @@
                     <%-- Display a row for each user in the database 
                     TODO properly add users
                     REMEBER users.user.name <-- gets name --%>
-                    <c:forEach var="items" items="${users}">
+                    <c:forEach var="user" items="${users}">
                         <tr>
                             <%-- User data --%>
-                            <td>${users[0]}</td>
-                            <td>${users[1]}</td>
-                            <td>${users[2]}</td>
-                            <td>${users[3]}</td>
+                            <td>${user.email}</td>
+                            <td>${user.firstName}</td>
+                            <td>${user.lastName}</td>
+                            <td>${user.role.roleName}</td>
 
                             <%-- Edit and delete links --%>
                             <td><a href="users?edit">Edit</a></td>
@@ -74,43 +79,53 @@
                     </c:forEach>
                 </table>
             </c:when>  
-                
+
         </c:choose>
 
         <%-- Display header depending on selected functionality --%>
         <h2> ${editUser ? "Edit User" : "Add User"} </h2>
-  
-              
-                <%-- Add or edit user form --%>
-                <form action="users" method="post">
+
+        <%-- Add or edit user form --%>
+        <form action="users" method="post">
+
+            <%-- E-mail input, readonly if edit is true --%>
+            Email: <input type="text" ${editUser ? "readonly" : "" } name="email" 
+                          value="${editUser ? user.email : ""}"><br>
+
+            <%-- If in edit mode name inputs are filled in with the selected user--%>
+            First name: <input type="text" name="firstName" value="${editUser ? user.firstName : ""}"><br>
+            Last name: <input type="text" name="lastName" value="${editUser ? user.lastName : ""}"><br>
+
+            Password: <input type="password" name="password"><br>
+
+            <%-- If in edit mode the role is set to the role of the selected user --%>
+            Role: 
+            <select name="role">
+                <%-- Populate the selections based on the data from the role table --%>
+                <%--
+                <c:forEach var="role" items="roles">
+                    <option value="${role.roleName}" ${user.role.isSelected ? "selected" : ""}>
+                        ${role.roleName}</option>
+                    </c:forEach>
+                     --%>
+                     <option value="systemAdmin" ${roleAdmin ? "selected" : ""}>system admin</option>
+                     <option value="regularUser" ${roleRegular ? "selected" : ""}>system admin</option>
+                   
+            </select><br>
+
+            <%-- If in edit mode show the buttons for update and cancel --%>
+            <c:choose>
+                <c:when test="${editUser}">
+                    <input type="submit" value="Update" name="action">
+                    <input type="submit" value="Cancel" name="action">
+                </c:when>
                     
-                    <%-- E-mail input, readonly if edit is true --%>
-                    Email: <input type="text" ${editUser ? "readonly" : "" } name="email" value="${users}"><br>
-                    
-                    <%-- If in edit mode name inputs are filled in with the selected user--%>
-                    First name: <input type="text" name="firstName" value="${users}"><br>
-                    Last name: <input type="text" name="lastName" value="${users}"><br>
-                    
-                    Password: <input type="password" name="password"><br>
-                    
-                    <%-- If in edit mode the role is set to the role of the selected user --%>
-                    Role: <select name="role">
-                        <option value="systemAdmin" ${roleAdmin ? "selected" : ""}>system admin</option>
-                        <option value="regularUser" ${roleRegular ? "selected" : "" }>regular user</option>
-                    </select><br>
-                    
-                        <%-- If in edit mode show the buttons for update and cancel --%>
-                        <c:choose>
-                            <c:when test="${editUser}">
-                                <input type="submit" value="Update" name="action">
-                                <input type="submit" value="Cancel" name="action">
-                            </c:when>
-                            <c:otherwise>
-                                <input type="submit" value="Add user" name="action">
-                            </c:otherwise>
-                        </c:choose>
-                    
-                </form>
+                <c:otherwise>
+                    <input type="submit" value="Add user" name="action">
+                </c:otherwise>
+            </c:choose>
+
+        </form>
 
     </body>
 </html>
