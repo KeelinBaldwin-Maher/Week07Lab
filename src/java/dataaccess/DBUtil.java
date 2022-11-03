@@ -1,34 +1,17 @@
 package dataaccess;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
-// Based on Week 7 demo 
+// Based on Week 9 demo 
 public class DBUtil {
 
-    // Close prepared statement
-    public static void closePreparedStatement(Statement ps) {
-        try {
-            // Only close prepared statement if argument is valid
-            if (ps != null) {
-                ps.close();
-            }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-    }
+   private static final EntityManagerFactory emf =
+        Persistence.createEntityManagerFactory("UserPU");
+        // The UserPU is the persistance unit name
     
-    // Close result set
-    public static void closeResultSet(ResultSet rs) {
-        try {
-             // Only close result set if argument is valid
-             if (rs != null) {
-                 rs.close();
-             }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
+    public static EntityManagerFactory getEmFactory() {
+        return emf;
     }
 
 }
