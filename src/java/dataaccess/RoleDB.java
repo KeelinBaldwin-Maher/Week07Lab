@@ -1,88 +1,44 @@
 package dataaccess;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.*;
+import javax.persistence.EntityManager;
 import models.Role;
 
 public class RoleDB {
-    // Connect to the database
-    ConnectionPool connectionPool = ConnectionPool.getInstance();
-    Connection connection = connectionPool.getConnection();
-    // Used to send queries and updates to database
-    PreparedStatement ps = null;
-    // Used to read query results
-    ResultSet rs = null;
-
+    
     // Retrieve all rows from userdb role table
     public ArrayList<Role> getAllRoles() throws Exception {
-        // SQL statement to retrieve all roles
-        String selectAllRoleData
-                = "SELECT * "
-                + "FROM role;";
-
-        // ArrayList to hold retrieved roles
-        ArrayList<Role> roles = new ArrayList<>();
+        // Instantiate EntityManager
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
 
         try {
-            ps = connection.prepareStatement(selectAllRoleData);
-            // Execute SELECT * FROM user;
-            rs = ps.executeQuery();
-
-            // Iterate through the retrieved rows
-            while (rs.next()) {
-                // Place row data into variables
-                int roleID = rs.getInt(1);
-                String roleName = rs.getString(2);
-                // Insantiate a role
-                Role role = new Role(roleID, roleName);
-                // Add role to roles ArrayList
-                roles.add(role);
-            }
-
+            // Find all of the roles in the database
+            ArrayList<Role> roles = (ArrayList) em.createNamedQuery("Role.findAll", Role.class).getResultList();
+            // Return list of roles
+            return roles;
+            
         } finally {
-            close();
+            em.close();
         }
 
-        return roles;
     }
 
       
     public String getRoleName(int roleID) throws Exception{
-        // SQL statement to retrieve role name
-        String selectRoleName
-                = "SELECT role_name FROM role "
-                 + "WHERE role_id = ?;";
-
-        // String to hold retrieved name
-        String roleName;
+        // Instantiate EntityManager
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
         
         try {
-            // Select the role name that matches the roleID
-            ps = connection.prepareStatement(selectRoleName);
-            ps.setInt(1, roleID);
-            // Execute SELECT statement
-            rs = ps.executeQuery();
+            // Find the role based on it's role id
+            Role role = em.find(Role.class, roleID);
             
-            // Setup iterator
-            rs.next();
-            // Set roleName to the retireved name
-            roleName = rs.getString(1);
-                       
+            // Return the role name
+            return role.getRoleName();
+            
         } finally {
-            close();
+           em.close();
         }
 
-        return roleName;
     }
     
-    private void close() {
-        // ensure that the connection, prepared statement and
-        // the result set are closed
-        DBUtil.closePreparedStatement(ps);
-        DBUtil.closeResultSet(rs);
-        connectionPool.freeConnection(connection);
-    }
-
 }

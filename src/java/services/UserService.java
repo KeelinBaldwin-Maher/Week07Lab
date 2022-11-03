@@ -1,6 +1,6 @@
 package services;
 
-import models.User;
+import models.*;
 import dataaccess.UserDB;
 import java.util.*;
 
@@ -36,7 +36,7 @@ public class UserService {
             // User RoleService to determine the users role name
             for (User user : users) {
                 // Determine the users role name using their role number 
-                int userRoleNumber = user.getRole().getRoleID();
+                int userRoleNumber = user.getRole().getRoleId();
                 String roleName = RoleService.findRoleName(userRoleNumber);
 
                 // Set the users role name 
@@ -58,7 +58,7 @@ public class UserService {
 
         try {
             // find the matching email
-            matchingEmail = new UserDB().findEmail(email);
+            matchingEmail = new UserDB().findMatchingEmail(email);
 
         } catch (Exception ex) {
             System.out.println(ex);
@@ -70,7 +70,14 @@ public class UserService {
     // Add a new user to the database
     public static void addUser(String email, String firstName, String lastName, String password, int roleID) {
         try {
-            new UserDB().insertNewUser(email, firstName, lastName, password, roleID);
+            // Create a new user to be passed on to the database
+            User user = new User(email, firstName, lastName, password);
+            
+            // Set the user's role
+            // Use the roleID to find the correct role name
+            user.setRole(new Role(roleID, RoleService.findRoleName(roleID)));
+                        
+            new UserDB().insertNewUser(user);
             
         } catch (Exception ex) {
             System.out.println(ex);

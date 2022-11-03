@@ -1,135 +1,87 @@
 package dataaccess;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.*;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import models.*;
 
 public class UserDB {
 
-    // Connect to the database
-    ConnectionPool connectionPool = ConnectionPool.getInstance();
-    Connection connection = connectionPool.getConnection();
-    // Used to send queries and updates to database
-    PreparedStatement ps = null;
-    // Used to read query results
-    ResultSet rs = null;
-
     public ArrayList<User> getAllUsers() throws Exception {
-        // SQL statement to retrieve all users
-        String selectAllFromUser
-                = "SELECT * "
-                + "FROM user ;";
-
-        // ArrayList to hold retrieved users
-        ArrayList<User> users = new ArrayList<>();
+        // Instantiate EntityManager
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
 
         try {
-            ps = connection.prepareStatement(selectAllFromUser);
-            // Execute SELECT * FROM user;
-            rs = ps.executeQuery();
-
-            // Iterate through the retrieved rows
-            while (rs.next()) {
-                // Place row data into variables
-                String email = rs.getString(1);
-                String firstName = rs.getString(2);
-                String lastName = rs.getString(3);
-                String password = rs.getString(4);
-                Role role = new Role(rs.getInt(5));
-                // Insantiate a user
-                User user = new User(email, firstName, lastName, password, role);
-                // Add user to users ArrayList
-                users.add(user);
-            }
+            // Find all of the users in the database
+            ArrayList<User> users = (ArrayList) em.createNamedQuery("User.findAll", User.class).getResultList();
+            // Return list of users
+            return users;
 
         } finally {
-            close();
+            em.close();
         }
 
-        return users;
     }
 
-    public String findEmail(String email) throws Exception {
-        // SQL statement to see if there is a matching email
-        String findEmail
-                = "SELECT email "
-                + "FROM user "
-                + "WHERE email = ? ;";
-
-        String matchingEmail = null;
+    public String findMatchingEmail(String email) throws Exception {
+        // Instantiate EntityManager
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
 
         try {
-            ps = connection.prepareStatement(findEmail);
-            ps.setString(1, email);
-            // Execute SELECT;
-            rs = ps.executeQuery();
-
-            // Iterate through the retrieved row
-            while (rs.next()) {
-                matchingEmail = rs.getString(1);
-            }
+            // Find the user based on their email, if one exists
+            User user = em.find(User.class, email);
+            // Return the users email
+            return user.getEmail();
 
         } finally {
-            close();
+            em.close();
         }
 
-        return matchingEmail;
-    }
-
-    public void insertNewUser(String email, String firstName, String lastName, String password, int roleID)
-            throws Exception {
-        // SQL statement for insertNewUser into user table
-        String insert
-                = "INSERT INTO user "
-                + "VALUES (?, ?, ?, ?, ?)  ;";
-
-        try {
-            ps = connection.prepareStatement(insert);
-            ps.setString(1, email);
-            ps.setString(2, firstName);
-            ps.setString(3, lastName);
-            ps.setString(4, password);
-            ps.setInt(5, roleID);
-            // Execute INSERT
-            ps.executeUpdate();
-
-        } finally {
-            close();
-        }
     }
 
     public User findUser(String email) throws Exception {
-        // SQL statement to find user based on email
-        String findUser
-                = "SELECT * "
-                + "FROM user "
-                + "WHERE email = ? ;";
-
-        User user = null;
+        // Instantiate EntityManager
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
 
         try {
-            ps = connection.prepareStatement(findUser);
-            ps.setString(1, email);
-            // Execute SELECT;
-            rs = ps.executeQuery();
-
-            // Iterate through the retrieved row
-            while (rs.next()) {
-                String firstName = rs.getString(2);
-                String lastName = rs.getString(3);
-                String password = rs.getString(4);
-                Role role = new Role(rs.getInt(5));
-                // Create user
-                user = new User(email, firstName, lastName, password, role);
-            }
+            // Find the user based on their email
+            User user = em.find(User.class, email);
+            // Return the users
+            return user;
 
         } finally {
-            close();
+            em.close();
         }
+    }
 
-        return user;
+    public void insertNewUser(User user)
+            throws Exception {
+        // Instantiate EntityManager
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        // Instantitate EntityTransaction so DML can be executed
+        EntityTransaction trans = em.getTransaction();
+
+        try {
+            
+           user.getRole().getUserList().add(user);
+           
+           // Transaction
+           trans.begin();
+           
+           // Insert the user into the user table
+           em.persist(user);
+           
+           // Roles have multiple users so this new user can be added to the respective role list
+           // update the role table
+           em.merge(user.getRole().getUserList().add(user));
+           
+        } catch (Exception ex) {
+            // Rollback if there is an error
+            trans.rollback();
+            
+        } finally {
+            em.close();
+        }
     }
 
     public void updateUser(String email, String firstName, String lastName, String password, int roleID)
@@ -175,16 +127,6 @@ public class UserDB {
             close();
         }
         
-    }
-    
-    private void close() {
-        // ensure that the connection, prepared statement and
-        // the result set are closed
-        DBUtil.closePreparedStatement(ps);
-        connectionPool.freeConnection(connection);
-        if (rs != null) {
-            DBUtil.closeResultSet(rs);
-        }
     }
     
 }
