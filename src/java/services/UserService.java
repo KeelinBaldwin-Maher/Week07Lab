@@ -97,11 +97,18 @@ public class UserService {
     // Update a current user in the database
     public static void updateUser(String email, String firstName, String lastName, String password, int roleID) {
        try {
-           new UserDB().updateUser(email, firstName, lastName, password, roleID);
-       } catch (Exception ex) {
-           System.out.println(ex);
-       }
-        
+            // Create a new user to be passed on to the database
+            User user = new User(email, firstName, lastName, password);
+            
+            // Set the user's role
+            // Use the roleID to find the correct role name
+            user.setRole(new Role(roleID, RoleService.findRoleName(roleID)));
+                        
+            new UserDB().insertNewUser(user);
+            
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
     }
 
 }

@@ -54,17 +54,13 @@ public class UserDB {
         }
     }
 
-    public void insertNewUser(User user)
-            throws Exception {
+    public void insertNewUser(User user) throws Exception {
         // Instantiate EntityManager
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         // Instantitate EntityTransaction so DML can be executed
         EntityTransaction trans = em.getTransaction();
 
         try {
-            
-           user.getRole().getUserList().add(user);
-           
            // Transaction
            trans.begin();
            
@@ -75,6 +71,8 @@ public class UserDB {
            // update the role table
            em.merge(user.getRole().getUserList().add(user));
            
+           trans.commit();
+           
         } catch (Exception ex) {
             // Rollback if there is an error
             trans.rollback();
@@ -84,49 +82,59 @@ public class UserDB {
         }
     }
 
-    public void updateUser(String email, String firstName, String lastName, String password, int roleID)
-            throws Exception {
-        // SQL statement to update user based on email
-        String updateUser
-                = "UPDATE user "
-                + "SET "
-                + "first_name = ?, "
-                + "last_name = ?, "
-                + "password = ?, "
-                + "role = ? "
-                + "WHERE email = ? ;";
+    public void updateUser(User user) throws Exception {
+        // Instantiate EntityManager
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        // Instantitate EntityTransaction so DML can be executed
+        EntityTransaction trans = em.getTransaction();
 
         try {
-            ps = connection.prepareStatement(updateUser);
-            ps.setString(1, firstName);
-            ps.setString(2, lastName);
-            ps.setString(3, password);
-            ps.setInt(4, roleID);
-            ps.setString(5, email);
-            // Execute UPDATE;
-            ps.executeUpdate();
+           // Transaction
+           trans.begin();
+           
+           // update the user into the user table
+           em.merge(user);
+           
+           trans.commit();
 
+        } catch (Exception ex) {
+            // Rollback if there is an error
+            trans.rollback();
+            
         } finally {
-            close();
+            em.close();
         }
     }
 
     public void deleteUser(String email) throws Exception{
-        // SQL statement to delete user based on email
-        String deletUser = 
-                "DELETE FROM user "
-                + "WHERE email = ?;";
+   // Instantiate EntityManager
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        // Instantitate EntityTransaction so DML can be executed
+        EntityTransaction trans = em.getTransaction();
 
         try {
-            ps = connection.prepareStatement(deletUser);
-            ps.setString(1, email);
-            // Execute DELETE;
-            ps.executeUpdate();
-
+            // Find the user based on their email
+            User user = em.find(User.class, email);
+            
+           // Transaction
+           trans.begin();
+           
+           // Insert the user into the user table
+           em.persist(user);
+           
+           // Roles have multiple users so this user can be deleted from the respective role list
+           // update the role table
+          em.remove(em.merge(user.getRole().getUserList().add(user)));
+           
+           trans.commit();
+           
+        } catch (Exception ex) {
+            // Rollback if there is an error
+            trans.rollback();
+            
         } finally {
-            close();
+            em.close();
         }
-        
     }
     
 }
