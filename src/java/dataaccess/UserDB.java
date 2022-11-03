@@ -124,7 +124,7 @@ public class UserDB {
            
            // Roles have multiple users so this user can be deleted from the respective role list
            // update the role table
-          em.remove(em.merge(user.getRole().getUserList().add(user)));
+          em.remove(em.merge(user.getRole().getUserList().remove(user)));
            
            trans.commit();
            
