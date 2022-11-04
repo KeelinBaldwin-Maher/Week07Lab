@@ -122,9 +122,9 @@
 
             <%-- If in edit mode name inputs are filled in with the selected user--%>
             First name: <input type="text" name="firstName" 
-                               value="${editUser ? userToEdit.firstName : inputFirstName}"><br>
+                               value="${editUser && !keepInput ? userToEdit.firstName : inputFirstName}"><br>
             Last name: <input type="text" name="lastName" 
-                              value="${editUser ? userToEdit.lastName : inputLastName}"><br>
+                              value="${editUser && !keepInput ? userToEdit.lastName : inputLastName}"><br>
 
             Password: <input type="password" name="password"><br>
 
@@ -133,7 +133,7 @@
             <select name="role">
                 <%-- Populate the selections based on the data from the role table --%>
                 <c:forEach var="role" items="${roles}">
-                    <option value="${role.roleID}" ${(userToEdit.role.roleID == role.roleID)  ? "selected" : ""}>
+                    <option value="${role.roleId}" ${(userToEdit.role.roleId == role.roleId)  ? "selected" : ""}>
                         ${role.roleName}
                     </option>
                     </c:forEach>

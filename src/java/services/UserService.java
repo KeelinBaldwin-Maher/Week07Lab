@@ -16,6 +16,7 @@ public class UserService {
         User user;
         try {
             user = new UserDB().findUser(email);
+
         } catch (Exception ex) {
             // Return null if the database could not be reached
             System.out.println(ex);
@@ -32,16 +33,6 @@ public class UserService {
             // Creates an ArrayList of users based on the data from userdb user table
             // The users are missing their role names
             users = new UserDB().getAllUsers();
-
-            // User RoleService to determine the users role name
-            for (User user : users) {
-                // Determine the users role name using their role number 
-                int userRoleNumber = user.getRole().getRoleId();
-                String roleName = RoleService.findRoleName(userRoleNumber);
-
-                // Set the users role name 
-                user.getRole().setRoleName(roleName);
-            }
 
         } catch (Exception ex) {
             // Return null if the database could not be reached
@@ -72,46 +63,52 @@ public class UserService {
         try {
             // Create a new user to be passed on to the database
             User user = new User(email, firstName, lastName, password);
-            
+
+            // Use the roleID to find the correct role
+            Role role = RoleService.getRole(roleID);
             // Set the user's role
-            // Use the roleID to find the correct role name
-            user.setRole(new Role(roleID, RoleService.findRoleName(roleID)));
-                        
+            user.setRole(role);
+            //user.setRole(new Role(roleID, RoleService.findRoleName(roleID)));
+
             new UserDB().insertNewUser(user);
-            
+
         } catch (Exception ex) {
             System.out.println(ex);
         }
     }
-    
+
     // Delete a user from the database
-     public static void deleteUser(String email) {
-       try {
-           new UserDB().deleteUser(email);
-           
-       } catch (Exception ex) {
-           System.out.println(ex);
-       }
+    public static void deleteUser(String email) {
+        try {
+            new UserDB().deleteUser(email);
+
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
     }
-    
+
     // Update a current user in the database
     public static void updateUser(String email, String firstName, String lastName, String password, int roleID) {
-       try {
+        try {
             // Get the user that already exists in the database using UserDB
             UserDB userDB = new UserDB();
             User user = userDB.findUser(email);
-            
+
             // Set the new user data
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setPassword(password);
-            
-            // Set the role data
-            Role role = user.getRole();
-            role.setRoleId(roleID);
-            // Set the role name based on the roleID parameter
-            role.setRoleName(RoleService.findRoleName(roleID));
-            
+
+            // Determine if the role has changed
+            if (roleID != user.getRole().getRoleId()) {
+                // Set the new role from the role table through RoleService
+                Role role = RoleService.getRole(roleID);
+                user.setRole(role);
+            }
+
+            // Send the updated user to be saved to the database
+            new UserDB().updateUser(user);
+
         } catch (Exception ex) {
             System.out.println(ex);
         }

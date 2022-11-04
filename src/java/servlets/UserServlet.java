@@ -101,7 +101,10 @@ public class UserServlet extends HttpServlet {
             case "Update":
                 // Check if all fields are filled in
                 if (email.isEmpty() || firstName.isEmpty() || lastName.isEmpty() || password.isEmpty()) {
+                    // Toggle error message
                     request.setAttribute("dataInvalid", true);
+                    // Set the current user inputs
+                    request.setAttribute("keepInput", true);
                     request.setAttribute("inputEmail", email);
                     request.setAttribute("inputFirstName", firstName);
                     request.setAttribute("inputLastName", lastName);
